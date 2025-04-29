@@ -1,75 +1,60 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../api/supabase';
-import { Session, User } from '@supabase/supabase-js';
+// src/contexts/AuthContext.tsx
+import { createContext, useContext, useState } from 'react';
+import { AuthUser, AuthState } from '../types/auth';
+import { ROLES, ADMIN_EMAIL_DOMAIN } from '../utils/constants';
 
-type AuthContextType = {
-  user: User | null;
-  session: Session | null;
-  role: 'admin' | 'alumni' | null;
-  isLoading: boolean;
-  signIn: (email: string, password: string, role: string) => Promise<void>;
-  signOut: () => Promise<void>;
-};
+interface AuthContextType extends AuthState {
+  login: (email: string, password: string, role: string) => Promise<AuthUser | null>;
+  logout: () => void;
+}
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<'admin' | 'alumni' | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    isLoading: false,
+    error: null,
+  });
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
+  const login = async (email: string, password: string, role: string) => {
+    setState({ ...state, isLoading: true });
+    try {
+      // In a real app, you would call your authentication API here
+      // This is a mock implementation for demonstration
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters');
       }
-    );
 
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+      const userRole = email.endsWith(ADMIN_EMAIL_DOMAIN) ? ROLES.ADMIN : ROLES.ALUMNI;
+      
+      if (role !== userRole) {
+        throw new Error(`You must login as ${userRole}`);
+      }
 
-  const signIn = async (email: string, password: string, role: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      const user: AuthUser = {
+        id: 'mock-user-id',
+        email,
+        role: userRole,
+      };
 
-    if (error) throw error;
-    
-    if (data.user?.email?.endsWith('@admin-domain.com')) {
-      setRole('admin');
-    } else {
-      setRole('alumni');
+      setState({ user, isLoading: false, error: null });
+      return user;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      setState({ user: null, isLoading: false, error: message });
+      return null;
     }
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setRole(null);
+  const logout = () => {
+    setState({ user: null, isLoading: false, error: null });
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        role,
-        isLoading,
-        signIn,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={{ ...state, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import LoginPage from './pages/Auth/LoginPage';
+import ProtectedRoute from './pages/Auth/ProtectedRoute';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import AlumniDashboard from './pages/Alumni/AlumniDashboard';
+import { ROLES } from './utils/constants';
 
-function App() {
-  const [count, setCount] = useState(0)
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            {/* Public route */}
+            <Route path="/login" element={<LoginPage />} />
 
-export default App
+            {/* Protected admin routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={[ROLES.ADMIN]} />
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+            </Route>
+
+            {/* Protected alumni routes */}
+            <Route
+              path="/alumni"
+              element={
+                <ProtectedRoute allowedRoles={[ROLES.ALUMNI]} />
+              }
+            >
+              <Route index element={<AlumniDashboard />} />
+            </Route>
+
+            {/* Default redirect */}
+            <Route path="/" element={<LoginPage />} />
+            <Route path="*" element={<LoginPage />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+};
+
+export default App;
