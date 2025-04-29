@@ -4,6 +4,8 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import RoleSelector from './RoleSelector';
 import { ROUTES } from '../../utils/constants';
 import { AuthUser } from '../../types/auth';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface LoginFormProps {
   onLogin: (email: string, password: string, role: string) => Promise<AuthUser | null>;
@@ -22,10 +24,20 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     setIsLoading(true);
     setError('');
 
+    // ✅ Basic validation
+    if (!email || !password) {
+      setError('Email and password are required');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const user = await onLogin(email, password, role);
       if (user) {
+        toast.success(`Welcome, ${user.role === 'admin' ? 'Admin' : 'Alumni'}!`);
         navigate(user.role === 'admin' ? ROUTES.ADMIN : ROUTES.ALUMNI);
+      } else {
+        setError('Invalid login credentials or role mismatch');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -58,7 +70,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         onChange={(e) => setPassword(e.target.value)}
       />
       {error && (
-        <Typography color="error" variant="body2">
+        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
           {error}
         </Typography>
       )}

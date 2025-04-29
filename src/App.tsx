@@ -6,6 +6,7 @@ import ProtectedRoute from './pages/Auth/ProtectedRoute';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import AlumniDashboard from './pages/Alumni/AlumniDashboard';
 import { ROLES } from './utils/constants';
+import { ToastContainer } from 'react-toastify';
 
 const theme = createTheme({
   palette: {
@@ -52,9 +53,11 @@ const App = () => {
             <Route path="/" element={<LoginPage />} />
             <Route path="*" element={<LoginPage />} />
           </Routes>
+          <ToastContainer position="top-right" autoClose={3000} />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
+    
   );
 };
 
