@@ -4,6 +4,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import RoleSelector from './RoleSelector';
 import { ROUTES } from '../../utils/constants';
 import { AuthUser } from '../../types/auth';
+import GoogleSignInButton from './GoogleSigninButton';
 
 interface LoginFormProps {
   onLogin: (email: string, password: string, role: string) => Promise<AuthUser | null>;
@@ -71,6 +72,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       >
         {isLoading ? 'Signing In...' : 'Sign In'}
       </Button>
+      <GoogleSignInButton />
     </Box>
   );
 };
