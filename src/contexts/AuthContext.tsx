@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useState } from 'react';
 import { AuthUser, AuthState } from '../types/auth';
-import { ROLES, ADMIN_EMAIL_DOMAIN } from '../utils/constants';
+import { ROLES, ADMIN_EMAIL } from '../utils/constants';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string, role: string) => Promise<AuthUser | null>;
@@ -20,16 +20,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string, role: string) => {
     setState({ ...state, isLoading: true });
     try {
-      // In a real app, you would call your authentication API here
-      // This is a mock implementation for demonstration
+      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       if (password.length < 6) {
         throw new Error('Password must be at least 6 characters');
       }
 
-      const userRole = email.endsWith(ADMIN_EMAIL_DOMAIN) ? ROLES.ADMIN : ROLES.ALUMNI;
-      
+      // Use full email match for admin
+      const userRole = email === ADMIN_EMAIL ? ROLES.ADMIN : ROLES.ALUMNI;
+
       if (role !== userRole) {
         throw new Error(`You must login as ${userRole}`);
       }

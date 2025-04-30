@@ -3,7 +3,7 @@ export const ROLES = {
     ALUMNI: 'alumni',
   } as const;
   
-  export const ADMIN_EMAIL_DOMAIN = '@admin-domain.com';
+  export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
   
   export const ROUTES = {
     LOGIN: '/login',
